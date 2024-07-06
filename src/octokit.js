@@ -16,6 +16,22 @@ const getRepositoryTree = async (octokit, owner, repo, branch, recursive) => {
     return fileNames;
 }
 
+const getRepository = async (octokit, owner, repo) => {
+    const res = await octokit.repos.get({
+        owner: owner,
+        repo: repo
+    });
+
+    return res.data;
+};
+
+const getDefaultBranch = async (octokit, owner, repo) => {
+    const repository = await getRepository(octokit, owner, repo);
+
+    return repository.default_branch;
+};
+
 module.exports = {
-    getRepositoryTree
+    getRepositoryTree,
+    getDefaultBranch
 }
