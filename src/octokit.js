@@ -3,6 +3,10 @@ const fromBase64 = (txt) => {
   return buffer.toString('ascii');
 }
 
+const toBase64 = (txt) => {
+  return Buffer.from(txt).toString('base64');
+}
+
 const getRepositoryTree = async (octokit, owner, repo, branch, recursive) => {
   if (recursive === undefined) {
     recursive = true;
@@ -64,9 +68,24 @@ const createNewBranch = async (octokit, owner, repo, newBranch, defaultBranch) =
   return true;
 }
 
+const upsertFile = async (octokit, owner, repo, branch, path, content, sha) => {
+  await octokit.repos.createOrUpdateFileContents({
+    repo: repo,
+    owner: owner,
+    path: path,
+    sha: sha,
+    message: `feat: update ${path}`,
+    content: toBase64(content),
+    branch: branch,
+  });
+
+  return true;
+}
+
 module.exports = {
   getRepositoryTree,
   getDefaultBranch,
   getFileContents,
-  createNewBranch
+  createNewBranch,
+  upsertFile
 }
