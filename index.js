@@ -1,7 +1,7 @@
 // Git Data API use case example
 // See: https://developer.github.com/v3/git/ to learn more
 
-const { getRepositoryTree, getDefaultBranch } = require('./src/octokit');
+const { getRepositoryTree, getDefaultBranch, getFileContents, createNewBranch, upsertFile, createPR } = require('./src/octokit');
 
 /**
  * This is the main entrypoint to your Probot app
@@ -22,7 +22,17 @@ module.exports = (app) => {
         const defaultBranch = await getDefaultBranch(context.octokit, owner, repo);
         const filesData = await getRepositoryTree(context.octokit, owner, repo, defaultBranch);
         const fileNames = filesData.map(f => f.path);
-        console.log(fileNames.join('\n'));
+
+        const filePathToBeUpdated = 'index.html'; // to be replaced by llm func
+        const fileToBeUpdated = filesData.find(f => f.path === filePathToBeUpdated);
+        const fileContents = await getFileContents(context.octokit, owner, repo, fileToBeUpdated.path, defaultBranch);
+
+        const updatedFileContents = "<UPDATED_CONTENT>"; // to be replaced by llm func
+
+        const newBranch = 'feat/integrate-sdk';
+        await createNewBranch(context.octokit, owner, repo, newBranch, defaultBranch);
+        await upsertFile(context.octokit, owner, repo, newBranch, fileToBeUpdated.path, updatedFileContents, fileToBeUpdated.sha);
+        await createPR(context.octokit, owner, repo, newBranch, defaultBranch);
       } catch (err) {
         console.log('FAILED TO CREATE PR for REPOSITORY', repository);
         console.log(err);
