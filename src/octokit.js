@@ -47,8 +47,26 @@ const getFileContents = async (octokit, owner, repo, path, ref) => {
   return fromBase64(res.data.content);
 }
 
+const createNewBranch = async (octokit, owner, repo, newBranch, defaultBranch) => {
+  const reference = await octokit.git.getRef({
+    repo: repo,
+    owner: owner,
+    ref: `heads/${defaultBranch}`,
+  });
+
+  await octokit.git.createRef({
+    repo: repo,
+    owner: owner,
+    ref: `refs/heads/${newBranch}`,
+    sha: reference.data.object.sha,
+  });
+
+  return true;
+}
+
 module.exports = {
   getRepositoryTree,
   getDefaultBranch,
-  getFileContents
+  getFileContents,
+  createNewBranch
 }
