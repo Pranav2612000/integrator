@@ -82,10 +82,25 @@ const upsertFile = async (octokit, owner, repo, branch, path, content, sha) => {
   return true;
 }
 
+const createPR = async (octokit, owner, repo, headBranch, baseBranch) => {
+  await octokit.pulls.create({
+    repo: repo,
+    owner: owner,
+    title: "feat: Updating support for SDK",
+    head: headBranch,
+    base: baseBranch,
+    body: "",
+    maintainer_can_modify: true,
+  });
+
+  return true;
+}
+
 module.exports = {
   getRepositoryTree,
   getDefaultBranch,
   getFileContents,
   createNewBranch,
-  upsertFile
+  upsertFile,
+  createPR
 }
