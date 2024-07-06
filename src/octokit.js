@@ -1,3 +1,8 @@
+const fromBase64 = (txt) => {
+  const buffer = new Buffer(txt, 'base64');
+  return buffer.toString('ascii');
+}
+
 const getRepositoryTree = async (octokit, owner, repo, branch, recursive) => {
   if (recursive === undefined) {
     recursive = true;
@@ -31,7 +36,19 @@ const getDefaultBranch = async (octokit, owner, repo) => {
   return repository.default_branch;
 };
 
+const getFileContents = async (octokit, owner, repo, path, ref) => {
+  const res = await octokit.repos.getContent({
+    owner: owner,
+    repo: repo,
+    path: path,
+    ref: ref
+  });
+
+  return fromBase64(res.data.content);
+}
+
 module.exports = {
   getRepositoryTree,
-  getDefaultBranch
+  getDefaultBranch,
+  getFileContents
 }
