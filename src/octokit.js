@@ -11,9 +11,9 @@ const getRepositoryTree = async (octokit, owner, repo, branch, recursive) => {
   });
 
   const files = res.data.tree;
-  const fileNames = files.map(f => f.path);
+  const filesData= files.map(f => ({ path: f.path, sha: f.sha }));
 
-  return fileNames;
+  return filesData;
 }
 
 const getRepository = async (octokit, owner, repo) => {

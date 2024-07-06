@@ -20,7 +20,8 @@ module.exports = (app) => {
         const repo = repository.name;
 
         const defaultBranch = await getDefaultBranch(context.octokit, owner, repo);
-        const fileNames = await getRepositoryTree(context.octokit, owner, repo, defaultBranch);
+        const filesData = await getRepositoryTree(context.octokit, owner, repo, defaultBranch);
+        const fileNames = filesData.map(f => f.path);
         console.log(fileNames.join('\n'));
       } catch (err) {
         console.log('FAILED TO CREATE PR for REPOSITORY', repository);
