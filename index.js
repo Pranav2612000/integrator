@@ -2,6 +2,7 @@
 // See: https://developer.github.com/v3/git/ to learn more
 
 const { getRepositoryTree, getDefaultBranch, getFileContents, createNewBranch, upsertFile, createPR } = require('./src/octokit');
+const { get_code_changes, get_file_names } = require('./llm_utils');
 
 /**
  * This is the main entrypoint to your Probot app
@@ -23,11 +24,28 @@ module.exports = (app) => {
         const filesData = await getRepositoryTree(context.octokit, owner, repo, defaultBranch);
         const fileNames = filesData.map(f => f.path);
 
-        const filePathToBeUpdated = 'index.html'; // to be replaced by llm func
+        const directoryStructure = fileNames.join('\n');
+
+        console.log('filesData:', filesData);
+        console.log('directoryStructure:', directoryStructure);
+
+        const extractedFileNames = await get_file_names(directoryStructure);
+        
+        console.log('extractedFileNames:', extractedFileNames);
+
+        const filePathToBeUpdated = extractedFileNames[0];
+
+        console.log(`File path to be updated: ${filePathToBeUpdated}`);
+
         const fileToBeUpdated = filesData.find(f => f.path === filePathToBeUpdated);
+        
+        console.log('fileToBeUpdated:', fileToBeUpdated);
+
         const fileContents = await getFileContents(context.octokit, owner, repo, fileToBeUpdated.path, defaultBranch);
 
-        const updatedFileContents = "<UPDATED_CONTENT>"; // to be replaced by llm func
+        const updatedFileContents = await get_code_changes(fileContents);
+
+        console.log('updatedFileContents:', updatedFileContents);
 
         const newBranch = 'feat/integrate-sdk';
         await createNewBranch(context.octokit, owner, repo, newBranch, defaultBranch);

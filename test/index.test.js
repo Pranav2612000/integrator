@@ -46,8 +46,18 @@ describe("My Probot app", () => {
         },
       })
 
+      // Add this mock to handle the GET request for the repository
+      .get("/repos/hiimbex/testing-things")
+      .reply(200, { default_branch: "master" })
+
       .get("/repos/hiimbex/testing-things/git/ref/heads%2Fmaster")
       .reply(200, { object: { sha: "abc123" } })
+
+      .post("/repos/hiimbex/testing-things/git/refs", {
+        ref: "refs/heads/new-branch-9999",
+        sha: "abc123",
+      })
+      .reply(200)
 
       .post("/repos/hiimbex/testing-things/git/refs", {
         ref: "refs/heads/new-branch-9999",
@@ -65,6 +75,17 @@ describe("My Probot app", () => {
       )
       .reply(200)
 
+      // mocking the PUT request a second time because request is being made twice but test only mock it once
+    .put(
+      "/repos/hiimbex/testing-things/contents/path%2Fto%2Fyour%2Ffile.md",
+      {
+        branch: "new-branch-9999",
+        message: "adds config file",
+        content: "TXkgbmV3IGZpbGUgaXMgYXdlc29tZSE=",
+      },
+    )
+    .reply(200)
+
       .post("/repos/hiimbex/testing-things/pulls", {
         title: "Adding my file!",
         head: "new-branch-9999",
@@ -73,6 +94,7 @@ describe("My Probot app", () => {
         maintainer_can_modify: true,
       })
       .reply(200);
+
 
     // Receive a webhook event
     await probot.receive({
